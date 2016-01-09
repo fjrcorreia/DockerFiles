@@ -14,7 +14,6 @@ function logInfo(){
 
 WILDFLY_BINARY_VERSION="wildfly-9.0.2.Final"
 WILDFLY_BINARY_URL="http://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.tar.gz"
-WILDFLY_MODULES_URL="http://sso-dev-evl-iam.ptin.corppt.com/downloads/jboss-eap-modules-0.0.1.tar.gz"
 WILDFLY_HOME="/opt/wildfly"
 WILDFLY_USER="wildfly"
 WILDFLY_GROUP="jboss"
@@ -32,14 +31,14 @@ logInfo "Expand Binaries"
 tar -xzf ${WILDFLY_BINARY_VERSION}.tar.gz
 rm ${WILDFLY_BINARY_VERSION}.tar.gz
 ## Unify the path
-mv  ${WILDFLY_BINARY_VERSION} wildfly
+mv  ${WILDFLY_BINARY_VERSION} ${WILDFLY_HOME}
 ## But save the current version
-echo ${WILDFLY_BINARY_VERSION} >> /opt/wildfly/VERSION
+echo ${WILDFLY_BINARY_VERSION} >> ${WILDFLY_HOME}/VERSION
 
 
 logInfo "Setting up Environment"
 addgroup -S ${WILDFLY_GROUP}
-adduser -S -D  -H -h /home/wildfly -s /bin/bash -G ${WILDFLY_GROUP} ${WILDFLY_USER}
+adduser -S -D  -H -h ${WILDFLY_HOME} -s /bin/bash -G ${WILDFLY_GROUP} ${WILDFLY_USER}
 chown -R  ${WILDFLY_USER}:${WILDFLY_GROUP}  /opt/wildfly
 
 
@@ -64,4 +63,4 @@ ${WILDFLY_HOME}/bin/add-user.sh admin Abc!12345 --silent
 # enable debug
 ## sed -i '9i\ DEBUG_MODE=true' ${WILDFLY_HOME}/bin/standalone.sh
 ## Not forcing debug mode
-## standalone.sh  --debug [port] 
+## standalone.sh  --debug [port]
