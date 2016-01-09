@@ -1,0 +1,133 @@
+#!/bin/bash
+##
+##
+
+
+
+
+FALSE="false"
+TRUE="true"
+
+
+
+## Common functions
+
+if [ -z ${DOCKER_SCRIPT_LOG} ]
+then
+    export DOCKER_SCRIPT_LOG="/tmp/docker-build-$(date +"%H.%m-%d.%m.%Y").log"
+fi
+
+
+LOG_TAG="[DOCKER-BUILD]"
+function logInfo(){
+    echo "> > > ${LOG_TAG}: $1" | tee -a ${DOCKER_SCRIPT_LOG}
+}
+
+function logError(){
+    echo "> > > ! ! ! ${LOG_TAG}[ERROR!]: $1" | tee -a ${DOCKER_SCRIPT_LOG}
+}
+
+
+
+function canBuildImage(){
+    CHECK_IMG=$( docker images | grep "${1}" )
+
+
+    if [  ${#CHECK_IMG} -gt 0 ]
+    then
+        logError "Docker Image Exists! \"${1}\""
+        return 0;
+    fi
+    
+    return 1;
+    
+}
+
+
+
+
+
+
+
+function dockerRemoveDanglingImages(){
+    IFS_OLD=$IFS
+
+    DOCKER_IMAGES_OUT=$(docker images | grep "<none>" | tr "\n" "%" )    
+
+    IFS='%'
+    declare -a DOCKER_IMAGES_LIST=(  $DOCKER_IMAGES_OUT ) 
+
+    COUNTER_REMOVED=0
+    for line in ${DOCKER_IMAGES_LIST[@]}
+    do
+        IFS=" "
+        declare -a DOCKER_IMAGE_INFO=(  $line ) 
+        if [ ${#DOCKER_IMAGE_INFO} -gt 2 ] && [ ! -z ${DOCKER_IMAGE_INFO[2]} ]
+        then 
+            DONE_REMOVING=0
+            while [ ${DONE_REMOVING} -eq 0 ]
+            do
+                echo "Found Dangling image ID: ${DOCKER_IMAGE_INFO[2]}, Removing!"
+                RESULT=$(docker rmi ${DOCKER_IMAGE_INFO[2]}  2>&1 )
+                RESULT_VAL=$?
+                if [ ! ${RESULT_VAL} -eq 0 ]
+                then 
+                    declare -a ERROR_IDS=( $(echo "${RESULT}" |  egrep -o "[0-9a-z]{12,12}"  | tr "\n" " " ) )
+                    if [ ! -z ${ERROR_IDS[1]} ]
+                    then
+                        
+                        echo "Confliting container ----- >  ${ERROR_IDS[1]}"
+                        docker rm ${ERROR_IDS[1]}
+    
+                        if [ -z ${LAST_CONTAINER_ID} ] || [ ! ${LAST_CONTAINER_ID} == ${ERROR_IDS[1]} ]
+                        then 
+                            echo "RETRY"
+                            LAST_CONTAINER_ID=${ERROR_IDS[1]}
+                            continue
+                        else
+                            echo "GIVE UP"
+                        fi
+                    fi
+                else
+                    COUNTER_REMOVED=$(( ${COUNTER_REMOVED}+1 ))
+                fi
+        
+                echo $RESULT
+                DONE_REMOVING=1
+            done
+            
+        fi
+        
+    done
+
+    echo "Total Images Removed: ${COUNTER_REMOVED}"
+    IFS=$IFS_OLD
+}
+
+
+
+
+
+function dockerRemoveAllContainers(){
+
+    DOCKER_CONTAINERS_LIST=$(docker ps -a | egrep -o "[0-9a-z]{12,12}"  | tr "\n" " " )    
+
+    COUNTER_REMOVED=0
+    for DOCKER_CONTAINER in ${DOCKER_CONTAINERS_LIST[@]}
+    do
+        docker rm ${DOCKER_CONTAINER} > /dev/null
+        if [ ! $? -eq 0 ]
+        then
+            RESULT="FAIL!"
+        else
+            RESULT="SUCCESS!"
+            COUNTER_REMOVED=$(( ${COUNTER_REMOVED}+1 ))        
+        fi
+        
+        echo "Removing Container -> ${DOCKER_CONTAINER}: ${RESULT}"
+       
+    done
+
+    echo "Total Containers Removed: ${COUNTER_REMOVED}"
+ 
+}

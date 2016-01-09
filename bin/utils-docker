@@ -1,0 +1,40 @@
+#!/bin/bash
+##
+##
+
+
+IAM_DOCKER_MAIN_SCRIPT_HOME=$(readlink -e $(dirname $0) )
+
+source ${IAM_DOCKER_MAIN_SCRIPT_HOME}/utils-docker-functions
+
+
+
+CUR_DIR=${PWD}
+if [ -z ${DOCKER_IMAGES_ROOT} ]
+then
+    export DOCKER_IMAGES_ROOT=${PWD}
+fi
+
+
+
+case $1 in
+    "--clean-dangling")
+        echo "Looking to clean house..."
+        dockerRemoveDanglingImages
+        echo "Done!"
+    ;;
+    "--remove-all")
+        echo "Going to clean all containers"
+        dockerRemoveAllContainers
+        echo "Done!"
+    ;;    
+    *)
+        echo "--help?"
+        echo "Usage:"   
+        echo ""
+        echo "  --clean-dangling    Clean all dangling images"
+        echo "  --remove-all        remove all existing containers"     
+    ;;
+esac
+
+
