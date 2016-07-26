@@ -1,4 +1,6 @@
-
+#
+# Smallest jdk 8
+#
 FROM fcorreia/base:alpine
 
 MAINTAINER  Francisco Correia <fjrcorreia@github.com>
