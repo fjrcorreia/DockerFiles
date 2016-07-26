@@ -13,8 +13,8 @@ MAINTAINER  Francisco Correia <fjrcorreia@github.com>
 
 # Set the WILDFLY_VERSION env variable
 ENV WILDFLY_VERSION 10.0.0.Final
-ENV WILDFLY_SHA1 c0dd7552c5207b0d116a9c25eb94d10b4f375549
-ENV JBOSS_HOME  /opt/wildfly
+ENV WILDFLY_SHA1    c0dd7552c5207b0d116a9c25eb94d10b4f375549
+ENV JBOSS_HOME      /opt/wildfly
 
 ## for jboss listen to the term signal
 ENV LAUNCH_JBOSS_IN_BACKGROUND 1
@@ -31,9 +31,13 @@ RUN wget http://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-${WILDFLY_VE
 ADD scripts/wildfly-launch.sh /opt/wildfly/bin/launch.sh
 
 ## Service, Administration and Debug port
-## to enable debug start container with standalone.sh --debug
 EXPOSE 8080 9990 8787
 
 USER wildfly
 
+
+## For debug mode, set the following environment variables
+##
+## DEBUG=true - to enable debug
+##
 CMD ["/opt/wildfly/bin/launch.sh"]
