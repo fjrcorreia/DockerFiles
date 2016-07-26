@@ -1,2 +1,0 @@
-JBoss Wildly Image
-=================
