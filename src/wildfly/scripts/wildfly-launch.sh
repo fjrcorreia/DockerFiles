@@ -23,8 +23,9 @@ JBOSS_INIT_DOMAIN=.init-domain
 
 start_jboss() {
     echo "I [WILDFLY-INIT]: starting jboss as a backgroung process for configuration"
-    LAUNCH_JBOSS_IN_BACKGROUND=1 JBOSS_PIDFILE=/tmp/jboss.pid ${JBOSS_HOME}/bin/standalone.sh -c standalone.xml &
-    #sleep 5
+    JBOSS_PIDFILE=/tmp/jboss.pid
+    LAUNCH_JBOSS_IN_BACKGROUND=1 ${JBOSS_HOME}/bin/standalone.sh -c standalone.xml &
+    sleep 5
     until $(nc -z  localhost 9990)
     do
       echo "I [WILDFLY-INIT]: Waiting for server to start!"
@@ -53,6 +54,11 @@ stop_boss() {
 
     if [ ${count} -gt ${kwait} ]; then
       kill -9 ${kpid}
+    fi
+
+    ## remove pid file if it still exists
+    if [ -e ${JBOSS_PIDFILE} ]; then
+      rm ${JBOSS_PIDFILE}
     fi
   fi
 
