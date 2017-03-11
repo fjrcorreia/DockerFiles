@@ -14,4 +14,4 @@ ENV CLASSPATH  .:/usr/lib/jvm/default-jvm/lib
 
 ## use repository version
 RUN apk add openjdk8 --update-cache \
-    && rm -rf /var/cache/apk/*
+    && if [ -e  "/var/cache/apk" ]; then rm -rf /var/cache/apk; fi
