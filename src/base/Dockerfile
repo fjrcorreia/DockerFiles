@@ -10,7 +10,9 @@ ENV LC_ALL en_US.UTF-8
 
 
 RUN apk add shadow --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/  \
-    && rm -rf /var/cache/apk/*
+    && apk add ca-certificates  --update-cache \
+    && update-ca-certificates \
+    && if [ -e  "/var/cache/apk" ]; then rm -rf /var/cache/apk; fi
 
 ## Add system user on a group out of normal scope for container ruuning service usage
 RUN addgroup -S -g 65535 service \
