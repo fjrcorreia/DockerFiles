@@ -23,7 +23,7 @@ JBOSS_INIT_DOMAIN=.init-domain
 
 start_jboss() {
     echo "I [WILDFLY-INIT]: starting jboss as a backgroung process for configuration"
-    /bin/bash -c "JBOSS_PIDFILE=${JBOSS_INIT_PID_FILE} LAUNCH_JBOSS_IN_BACKGROUND=1 ${JBOSS_HOME}/bin/standalone.sh -c ${JBOSS_CONFIG}" &
+    /bin/sh -c "JBOSS_PIDFILE=${JBOSS_INIT_PID_FILE} LAUNCH_JBOSS_IN_BACKGROUND=1 ${JBOSS_HOME}/bin/standalone.sh -c ${JBOSS_CONFIG}" &
     sleep 5
     until $(nc -z  localhost 9990)
     do
