@@ -15,7 +15,7 @@ JBOSS_PASSOWRD=${JBOSS_PASSOWRD:-Abc!12345}
 
 
 
-
+JBOSS_INIT_PID_FILE=/tmp/jboss.pid
 JBOSS_INIT_DOMAIN=.init-domain
 
 
@@ -23,8 +23,7 @@ JBOSS_INIT_DOMAIN=.init-domain
 
 start_jboss() {
     echo "I [WILDFLY-INIT]: starting jboss as a backgroung process for configuration"
-    JBOSS_PIDFILE=/tmp/jboss.pid
-    LAUNCH_JBOSS_IN_BACKGROUND=1 ${JBOSS_HOME}/bin/standalone.sh -c ${JBOSS_CONFIG} &
+    /bin/bash -c "JBOSS_PIDFILE=${JBOSS_INIT_PID_FILE} LAUNCH_JBOSS_IN_BACKGROUND=1 ${JBOSS_HOME}/bin/standalone.sh -c ${JBOSS_CONFIG}" &
     sleep 5
     until $(nc -z  localhost 9990)
     do
@@ -34,13 +33,14 @@ start_jboss() {
 
 }
 
+
 ## STOP JBOSS as a Service
 stop_boss() {
   echo "I [WILDFLY-INIT]: Stopping JBOSS on background!"
   count=0;
 
-  if [ -f ${JBOSS_PIDFILE} ]; then
-    kpid=$(cat ${JBOSS_PIDFILE})
+  if [ -f ${JBOSS_INIT_PID_FILE} ]; then
+    kpid=$(cat ${JBOSS_INIT_PID_FILE})
     ## 30 seconds wait
     let kwait=30
 
@@ -57,13 +57,15 @@ stop_boss() {
     fi
 
     ## remove pid file if it still exists
-    if [ -e ${JBOSS_PIDFILE} ]; then
-      rm ${JBOSS_PIDFILE}
+    if [ -e ${JBOSS_INIT_PID_FILE} ]; then
+      rm ${JBOSS_INIT_PID_FILE}
     fi
+  else
+    echo "I [WILDFLY-INIT]: No Pid File? shutdown every Java process"
+    pkill -9 java
   fi
 
   sleep 2
-  unset JBOSS_PIDFILE
   echo "I [WILDFLY-INIT]: Stopped!"
 }
 

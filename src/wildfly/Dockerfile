@@ -26,7 +26,11 @@ RUN wget http://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-${WILDFLY_VE
     && mkdir /opt && mv wildfly-${WILDFLY_VERSION} /opt/wildfly \
     && usermod -d /opt/wildfly -l wildfly -c "JBoss Wildfly User" app-user \
     && chown -R wildfly. ${JBOSS_HOME} \
-    && mkdir /docker-init.d
+    && mkdir /docker-init.d \
+    && apk update \
+    && apk add ca-certificates \
+    && update-ca-certificates \
+    && if [ -e "/var/cache/apk" ]; then rm -rf /var/cache/apk; fi
 
 ADD scripts/wildfly-launch.sh /opt/wildfly/bin/launch.sh
 
