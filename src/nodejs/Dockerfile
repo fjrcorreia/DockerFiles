@@ -23,7 +23,7 @@ RUN apk add --update openssl \
             ncurses-terminfo ncurses-terminfo-base npth openssh openssh-client \
             openssh-sftp-server openssl paxctl pinentry pkgconf pkgconfig python \
             readline sqlite-libs \
-    && if [ -e  "/var/cache/apk" ]; then rm -rf /var/cache/apk; fi
+    && rm -rf /var/cache/apk/*
 
 
 # RUN apk add --update nodejs libgcc libstdc++ libuv
